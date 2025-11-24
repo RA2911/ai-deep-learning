@@ -495,8 +495,9 @@
         });
 
         // Sign Up Link
-        signupLink.addEventListener('click', (e) => {
+        signupLink.addEventListener('click', async (e) => {
             e.preventDefault();
+            console.log('Sign up clicked!');
             
             const email = emailInput.value.trim();
             const password = passwordInput.value;
@@ -507,38 +508,37 @@
             }
 
             // Confirm sign up
-            if (confirm('Create a new account with this email?')) {
+            if (confirm('Create a new account with this email: ' + email + '?')) {
                 setLoading(true);
                 
-                createUserWithEmailAndPassword(auth, email, password)
-                    .then((userCredential) => {
-                        showSuccess('Account created successfully! You are now logged in.');
-                        console.log('User created:', userCredential.user);
-                        
-                        // Get Firebase token
-                        userCredential.user.getIdToken().then((token) => {
-                            localStorage.setItem('firebase_token', token);
-                            setTimeout(() => {
-                                window.location.href = '/dashboard';
-                            }, 2000);
-                        });
-                    })
-                    .catch((error) => {
-                        console.error('Sign up error:', error);
-                        
-                        if (error.code === 'auth/email-already-in-use') {
-                            showError(emailError, 'Email already in use. Try logging in.');
-                        } else if (error.code === 'auth/weak-password') {
-                            showError(passwordError, 'Password should be at least 6 characters.');
-                        } else if (error.code === 'auth/invalid-email') {
-                            showError(emailError, 'Invalid email address.');
-                        } else {
-                            showError(loginError, 'Sign up failed. Please try again.');
-                        }
-                    })
-                    .finally(() => {
-                        setLoading(false);
-                    });
+                try {
+                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                    showSuccess('Account created successfully! You are now logged in.');
+                    console.log('User created:', userCredential.user);
+                    
+                    // Get Firebase token
+                    const token = await userCredential.user.getIdToken();
+                    localStorage.setItem('firebase_token', token);
+                    
+                    // Redirect to dashboard
+                    setTimeout(() => {
+                        window.location.href = '/dashboard';
+                    }, 2000);
+                } catch (error) {
+                    console.error('Sign up error:', error);
+                    
+                    if (error.code === 'auth/email-already-in-use') {
+                        showError(emailError, 'Email already in use. Try logging in.');
+                    } else if (error.code === 'auth/weak-password') {
+                        showError(passwordError, 'Password should be at least 6 characters.');
+                    } else if (error.code === 'auth/invalid-email') {
+                        showError(emailError, 'Invalid email address.');
+                    } else {
+                        showError(loginError, 'Sign up failed. Please try again. Error: ' + error.message);
+                    }
+                } finally {
+                    setLoading(false);
+                }
             }
         });
 
