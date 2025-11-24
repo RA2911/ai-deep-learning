@@ -246,10 +246,10 @@
         <form id="loginForm">
             <div class="form-group">
                 <label for="email">Email Address</label>
-                <input 
-                    type="email" 
-                    id="email" 
-                    placeholder="your@email.com" 
+                <input
+                    type="email"
+                    id="email"
+                    placeholder="your@email.com"
                     required
                 >
                 <div class="error-message" id="emailError"></div>
@@ -257,10 +257,10 @@
 
             <div class="form-group">
                 <label for="password">Password</label>
-                <input 
-                    type="password" 
-                    id="password" 
-                    placeholder="Enter your password" 
+                <input
+                    type="password"
+                    id="password"
+                    placeholder="Enter your password"
                     required
                 >
                 <div class="error-message" id="passwordError"></div>
@@ -298,8 +298,8 @@
     <script type="module">
         // Import Firebase functions
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
-        import { 
-            getAuth, 
+        import {
+            getAuth,
             signInWithEmailAndPassword,
             createUserWithEmailAndPassword,
             signInWithPopup,
@@ -309,7 +309,7 @@
 
         // Your Firebase configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyDuQ1EFMk2VglBcHGyAF1TZRI91TqLoEBM",
+            apiKey: "AIzaSyDUO1EFMk2VglBcHGyAF1TZRI91TqLoEBM",
             authDomain: "deepacademy-96e3c.firebaseapp.com",
             projectId: "deepacademy-96e3c",
             storageBucket: "deepacademy-96e3c.firebasestorage.app",
@@ -367,7 +367,7 @@
         // Email/Password Login
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             // Clear previous errors
             hideError(emailError);
             hideError(passwordError);
@@ -392,21 +392,21 @@
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 showSuccess('Login successful! Redirecting...');
                 console.log('User logged in:', userCredential.user);
-                
+
                 // Get Firebase token
                 const token = await userCredential.user.getIdToken();
-                
+
                 // Store token in localStorage
                 localStorage.setItem('firebase_token', token);
-                
+
                 // Redirect to dashboard
                 setTimeout(() => {
                     window.location.href = '/dashboard';
                 }, 2000);
-                
+
             } catch (error) {
                 console.error('Login error:', error);
-                
+
                 // Show specific error messages
                 if (error.code === 'auth/user-not-found') {
                     showError(loginError, 'Email not found. Please sign up first.');
@@ -430,7 +430,7 @@
         googleButton.addEventListener('click', async (e) => {
             e.preventDefault();
             hideError(loginError);
-            
+
             googleButton.disabled = true;
             const originalText = googleButton.innerHTML;
             googleButton.innerHTML = '<span class="loading-spinner"></span> Signing in...';
@@ -439,21 +439,21 @@
                 const result = await signInWithPopup(auth, googleProvider);
                 showSuccess('Google login successful! Redirecting...');
                 console.log('User logged in:', result.user);
-                
+
                 // Get Firebase token
                 const token = await result.user.getIdToken();
-                
+
                 // Store token in localStorage
                 localStorage.setItem('firebase_token', token);
-                
+
                 // Redirect to dashboard
                 setTimeout(() => {
                     window.location.href = '/dashboard';
                 }, 2000);
-                
+
             } catch (error) {
                 console.error('Google login error:', error);
-                
+
                 if (error.code === 'auth/popup-closed-by-user') {
                     // User closed the popup, no error needed
                 } else if (error.code === 'auth/cancelled-popup-request') {
@@ -470,9 +470,9 @@
         // Forgot Password
         forgotPasswordLink.addEventListener('click', async (e) => {
             e.preventDefault();
-            
+
             const email = emailInput.value.trim();
-            
+
             if (!email) {
                 showError(emailError, 'Please enter your email address first.');
                 return;
@@ -483,7 +483,7 @@
                 showSuccess('Password reset email sent! Check your inbox.');
             } catch (error) {
                 console.error('Password reset error:', error);
-                
+
                 if (error.code === 'auth/user-not-found') {
                     showError(loginError, 'No account found with this email.');
                 } else if (error.code === 'auth/invalid-email') {
@@ -498,7 +498,7 @@
         signupLink.addEventListener('click', async (e) => {
             e.preventDefault();
             console.log('Sign up clicked!');
-            
+
             const email = emailInput.value.trim();
             const password = passwordInput.value;
 
@@ -510,23 +510,23 @@
             // Confirm sign up
             if (confirm('Create a new account with this email: ' + email + '?')) {
                 setLoading(true);
-                
+
                 try {
                     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                     showSuccess('Account created successfully! You are now logged in.');
                     console.log('User created:', userCredential.user);
-                    
+
                     // Get Firebase token
                     const token = await userCredential.user.getIdToken();
                     localStorage.setItem('firebase_token', token);
-                    
+
                     // Redirect to dashboard
                     setTimeout(() => {
                         window.location.href = '/dashboard';
                     }, 2000);
                 } catch (error) {
                     console.error('Sign up error:', error);
-                    
+
                     if (error.code === 'auth/email-already-in-use') {
                         showError(emailError, 'Email already in use. Try logging in.');
                     } else if (error.code === 'auth/weak-password') {
