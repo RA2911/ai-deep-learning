@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - AI Deep Learning</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+
+        header {
+            background: linear-gradient(135deg, #A89968 0%, #8B7355 100%);
+            color: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 24px;
+        }
+
+        .logout-button {
+            background: white;
+            color: #A89968;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .logout-button:hover {
+            background: #f0f0f0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .welcome-section {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+
+        .welcome-section h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .welcome-section p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .courses-section {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .courses-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .course-card {
+            border: 1px solid #eee;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .course-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .course-card h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .course-card p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            background: #eee;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            background: linear-gradient(135deg, #A89968 0%, #8B7355 100%);
+            height: 100%;
+            width: 0%;
+            border-radius: 4px;
+        }
+
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #eee;
+            border-radius: 50%;
+            border-top-color: #A89968;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>AI Deep Learning Dashboard</h1>
+        <button class="logout-button" id="logoutButton">Logout</button>
+    </header>
+
+    <div class="container">
+        <div class="error-message" id="errorMessage"></div>
+
+        <div class="welcome-section">
+            <h2>Welcome, <span id="userEmail">Student</span>! 👋</h2>
+            <p>Your learning journey starts here. Complete courses, track your progress, and achieve your goals.</p>
+        </div>
+
+        <div class="courses-section">
+            <h2>Your Courses</h2>
+            <div id="coursesContainer" class="loading">
+                <div class="spinner"></div>
+                <p>Loading your courses...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import Firebase functions
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+        import { 
+            getAuth, 
+            signOut,
+            onAuthStateChanged
+        } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
+
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDuQ1EFMk2VglBcHGyAF1TZRI91TqLoEBM",
+            authDomain: "deepacademy-96e3c.firebaseapp.com",
+            projectId: "deepacademy-96e3c",
+            storageBucket: "deepacademy-96e3c.firebasestorage.app",
+            messagingSenderId: "801289797734",
+            appId: "1:801289797734:web:448ad230fbe35e2615eda7"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Get DOM elements
+        const userEmail = document.getElementById('userEmail');
+        const logoutButton = document.getElementById('logoutButton');
+        const coursesContainer = document.getElementById('coursesContainer');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // Check if user is logged in
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                // User not logged in, redirect to login page
+                window.location.href = '/';
+                return;
+            }
+
+            // User is logged in
+            console.log('User logged in:', user.email);
+            userEmail.textContent = user.email;
+
+            // Load user courses
+            loadUserCourses(user);
+        });
+
+        // Logout
+        logoutButton.addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                localStorage.removeItem('firebase_token');
+                window.location.href = '/';
+            } catch (error) {
+                console.error('Logout error:', error);
+                showError('Logout failed. Please try again.');
+            }
+        });
+
+        // Load user courses (placeholder)
+        function loadUserCourses(user) {
+            // TODO: Fetch courses from backend API
+            // This will connect to your Django backend to get student enrollments
+
+            const coursesHTML = `
+                <div class="course-card">
+                    <h3>Module 1: Introduction to AI</h3>
+                    <p>Learn the basics of artificial intelligence and machine learning</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 0%"></div>
+                    </div>
+                    <p style="font-size: 12px; color: #999;">0% Complete</p>
+                </div>
+
+                <div class="course-card">
+                    <h3>Coming Soon: Module 2</h3>
+                    <p>More advanced topics will be available soon</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 0%"></div>
+                    </div>
+                    <p style="font-size: 12px; color: #999;">Not yet available</p>
+                </div>
+            `;
+
+            coursesContainer.innerHTML = coursesHTML;
+
+            // TODO: Uncomment this to fetch from actual backend
+            /*
+            fetch('/api/user/courses', {
+                headers: {
+                    'Authorization': 'Bearer ' + localStorage.getItem('firebase_token')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display courses
+                console.log('Courses:', data);
+                coursesContainer.innerHTML = generateCoursesHTML(data);
+            })
+            .catch(error => {
+                console.error('Error loading courses:', error);
+                showError('Failed to load courses. Please refresh the page.');
+            });
+            */
+        }
+
+        // Show error message
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.add('show');
+            setTimeout(() => {
+                errorMessage.classList.remove('show');
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
