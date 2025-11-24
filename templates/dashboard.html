@@ -192,7 +192,7 @@
 
         // Your Firebase configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyDuQ1EFMk2VglBcHGyAF1TZRI91TqLoEBM",
+            apiKey: "AIzaSyDUO1EFMk2VglBcHGyAF1TZRI91TqLoEBM",
             authDomain: "deepacademy-96e3c.firebaseapp.com",
             projectId: "deepacademy-96e3c",
             storageBucket: "deepacademy-96e3c.firebasestorage.app",
@@ -213,16 +213,16 @@
         // Check if user is logged in
         onAuthStateChanged(auth, (user) => {
             if (!user) {
-                // User not logged in, redirect to login page
+                // User not logged in, redirect to login
                 window.location.href = '/';
                 return;
             }
 
-            // User is logged in
+            // User is logged in, show their email
+            userEmail.textContent = user.email || 'Student';
             console.log('User logged in:', user.email);
-            userEmail.textContent = user.email;
 
-            // Load user courses
+            // Load user courses (placeholder)
             loadUserCourses(user);
         });
 
